@@ -1,8 +1,43 @@
+# Python
 .venv/
+venv/
 __pycache__/
 *.py[cod]
-db.sqlite3
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Django and local databases
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+backend/staticfiles/
+media/
+*.log
+
+# Frontend dependencies and generated files
 node_modules/
+frontend/dist/
 dist/
-.env
 coverage/
+*.tsbuildinfo
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated deployment bundles
+deploy/*.zip
