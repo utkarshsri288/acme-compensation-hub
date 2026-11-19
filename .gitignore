@@ -41,3 +41,7 @@ Thumbs.db
 
 # Generated deployment bundles
 deploy/*.zip
+
+# Local visual planning and private handoff document
+/planning/
+/docs/ACME-Compensation-Hub-Assessment-Guide.docx
