@@ -1,0 +1,29 @@
+.employee-directory-table th .sort-button,
+.employee-directory-table th .sort-button:hover:not(:disabled) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--psaux-faint, #87958e);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: none;
+}
+.employee-directory-table th .sort-button:hover:not(:disabled),
+.employee-directory-table th .sort-button:focus-visible {
+  color: var(--psaux-blue, #2b66c9);
+}
+.employee-directory-table th .sort-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding-top:14px;border-top:1px solid #edf1ee}.page-numbers{display:flex;gap:5px}.pagination button{min-width:34px;padding:8px 10px}.pagination button:disabled{cursor:not-allowed;opacity:.45}
+.pagination [aria-current="page"]{font-weight:800}.history-entry{margin-top:8px}.history-entry b,.history-entry small{display:block}.history-entry small{color:#6d7e86;margin-top:3px}

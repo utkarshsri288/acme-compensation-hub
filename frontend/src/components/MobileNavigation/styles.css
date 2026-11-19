@@ -1,0 +1,36 @@
+.mobile-navigation { display: none; }
+
+@media (max-width: 800px) {
+  .mobile-navigation {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 8;
+    display: flex;
+    justify-content: space-around;
+    gap: 4px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--psaux-border, #e3e5f2);
+    background: #fff;
+    box-shadow: 0 -8px 24px #14162a12;
+  }
+  .mobile-navigation button,
+  .mobile-navigation button:hover:not(:disabled) {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 10px 4px;
+    border: 0;
+    background: transparent;
+    color: #585c78;
+    font-size: 11px;
+    transform: none;
+  }
+  .mobile-navigation button.active,
+  .mobile-navigation button.active:hover:not(:disabled) {
+    background: var(--psaux-soft, #eef3ff);
+    color: var(--psaux-ink, #1d43cc);
+  }
+  .app-shell > main { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+}

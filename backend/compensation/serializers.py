@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import Employee, SalaryRecord
+from .currency import FX_RATES
+from .models import Employee, SalaryRecord, SalaryHistory
+
+class SalaryHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SalaryHistory
+        fields = ["amount", "currency", "pay_frequency", "effective_date", "reason", "created_at"]
 
 class SalarySerializer(serializers.ModelSerializer):
     annualized = serializers.SerializerMethodField()
@@ -16,8 +22,13 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ["id", "full_name", "first_name", "last_name", "email", "country", "department", "status", "start_date", "salary", "annualized_usd"]
     def get_annualized_usd(self, obj):
-        rates = {"USD": 1, "INR": .012, "GBP": 1.27, "EUR": 1.09, "SGD": .74, "AUD": .65}
-        return round(float(obj.salary.annualized()) * rates[obj.salary.currency], 2)
+        return round(float(obj.salary.annualized() * FX_RATES[obj.salary.currency]), 2)
+
+class EmployeeDetailSerializer(EmployeeSerializer):
+    salary_history = SalaryHistorySerializer(many=True, read_only=True)
+
+    class Meta(EmployeeSerializer.Meta):
+        fields = EmployeeSerializer.Meta.fields + ["salary_history"]
 
 class SalaryUpdateSerializer(serializers.ModelSerializer):
     class Meta:

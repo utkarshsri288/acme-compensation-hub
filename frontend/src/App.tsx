@@ -1,11 +1,70 @@
-import { useQuery } from "@tanstack/react-query";
-const money = (value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
-type Dashboard = { headcount: number; payroll_usd: number; average_salary_usd: number; countries: number };
-type Employee = { id: number; full_name: string; email: string; country: string; department: string; status: string; annualized_usd: number; salary: { amount: string; currency: string } };
-async function get<T>(url: string): Promise<T> { const response = await fetch(url); if (!response.ok) throw new Error("Unable to load compensation data"); return response.json(); }
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Sidebar, { type Screen } from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import MobileNavigation from "./components/MobileNavigation";
+import Login from "./pages/Login";
+import DashboardPage from "./pages/Dashboard";
+import EmployeesPage, { ProfileDrawer } from "./pages/Employees";
+import InsightsPage from "./pages/Insights";
+import AdminSettingsPage from "./pages/AdminSettings";
+import { api, type AuthUser } from "./shared/api";
+
 export default function App() {
-  const dashboard = useQuery({ queryKey: ["dashboard"], queryFn: () => get<Dashboard>("/api/dashboard") });
-  const employees = useQuery({ queryKey: ["employees"], queryFn: () => get<{ data: Employee[]; meta: { total: number } }>("/api/employees?page_size=8") });
-  return <div className="app-shell"><aside><div className="brand">ACME <span>Comp Hub</span></div><div className="nav-label">Workspace</div><div className="nav active">▦ &nbsp; Dashboard</div><div className="nav">⌕ &nbsp; Employees</div><div className="nav">◒ &nbsp; Insights</div><div className="nav-label">Manage</div><div className="nav">⇧ &nbsp; Import / export</div><div className="nav">⚙ &nbsp; Settings</div></aside><main><header><b>Dashboard</b><span>HR Operations <i>AR</i></span></header><section className="content"><div className="heading"><div><p className="eyebrow">Compensation overview</p><h1>Good morning, Alex</h1><p>Here’s how ACME compensation is distributed today.</p></div><button>Export report ↓</button></div>{dashboard.isLoading ? <div className="loading">Loading compensation overview…</div> : dashboard.isError ? <div className="error">Unable to load dashboard. Check that the API is running.</div> : <><div className="stats"><Stat label="Headcount" value={dashboard.data!.headcount.toLocaleString()} hint="Active workforce"/><Stat label="Annual payroll" value={money(dashboard.data!.payroll_usd)} hint="USD equivalent"/><Stat label="Average salary" value={money(dashboard.data!.average_salary_usd)} hint="Across all regions"/><Stat label="Countries" value={String(dashboard.data!.countries)} hint="Represented"/></div><div className="panels"><div className="panel"><h3>Payroll operating model</h3><p>Use the Employees view to search, review, and update individual compensation records.</p><div className="bar"><span style={{width:"82%"}}></span></div><div className="legend"><span>Data-backed workspace</span><b>10,000 seeded records</b></div></div><div className="panel"><h3>Trust & assumptions</h3><ul><li>Reporting currency: USD</li><li>Salary values remain in local currency</li><li>Every update creates an audit event</li></ul></div></div><div className="panel table-panel"><div className="panel-head"><div><h3>Recent employee records</h3><p>Showing a preview of the directory.</p></div><button className="ghost">View all employees →</button></div>{employees.isLoading ? <div className="loading">Loading employees…</div> : employees.isError ? <div className="error">Unable to load employee records.</div> : <table><thead><tr><th>Employee</th><th>Department</th><th>Country</th><th>Annual salary</th><th>Status</th></tr></thead><tbody>{employees.data!.data.map(employee => <tr key={employee.id}><td><b>{employee.full_name}</b><small>{employee.email}</small></td><td>{employee.department}</td><td>{employee.country}</td><td>{money(employee.annualized_usd)}</td><td><span className="status">{employee.status.replace("_", " ")}</span></td></tr>)}</tbody></table>}</div></>}</section></main></div>
+  const [token, setToken] = useState(() => localStorage.getItem("acme_token"));
+  const queryClient = useQueryClient();
+  const session = useQuery({ queryKey: ["me", token], queryFn: () => api<AuthUser>("/api/auth/me"), enabled: Boolean(token), retry: false });
+  useEffect(() => {
+    if (session.isError) localStorage.removeItem("acme_token");
+  }, [session.isError]);
+  if (!token || session.isError) return <Login onLogin={(nextToken, nextUser) => {
+    localStorage.setItem("acme_token", nextToken);
+    queryClient.setQueryData(["me", nextToken], nextUser);
+    setToken(nextToken);
+  }} />;
+  if (!session.data) return <div className="state" role="status">Checking your session…</div>;
+  return <AuthenticatedApp user={session.data} onLogout={() => {
+    void api("/api/auth/logout", { method: "POST" }).catch(() => undefined);
+    localStorage.removeItem("acme_token");
+    queryClient.clear();
+    setToken(null);
+  }} />;
 }
-function Stat({ label, value, hint }: { label: string; value: string; hint: string }) { return <div className="stat"><span>{label}</span><strong>{value}</strong><small>{hint}</small></div>; }
+
+function AuthenticatedApp({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
+  const queryClient = useQueryClient();
+  const [screen, setScreen] = useState<Screen>("dashboard");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [country, setCountry] = useState("");
+  const [department, setDepartment] = useState("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("name");
+  const [direction, setDirection] = useState<"asc" | "desc">("asc");
+  const logout = () => { queryClient.clear(); onLogout(); };
+  const updateSearch = (value: string) => { setSearch(value); setPage(1); };
+  const updateCountry = (value: string) => { setCountry(value); setPage(1); };
+  const updateDepartment = (value: string) => { setDepartment(value); setPage(1); };
+  const updateStatus = (value: string) => { setStatus(value); setPage(1); };
+  const updateSort = (column: string) => {
+    if (sort === column) setDirection(direction === "asc" ? "desc" : "asc");
+    else { setSort(column); setDirection("asc"); }
+    setPage(1);
+  };
+
+  return <div className="app-shell">
+    <Sidebar screen={screen} role={user.role} onChange={setScreen} />
+    <main>
+      <Topbar screen={screen} user={user} onLogout={logout} />
+      <div className={`content ${screen === "employees" ? "directory-content" : ""}`}>
+        {screen === "dashboard" && <DashboardPage name={user.name} onViewEmployees={() => setScreen("employees")} />}
+        {screen === "employees" && <EmployeesPage search={search} setSearch={updateSearch} country={country} setCountry={updateCountry} department={department} setDepartment={updateDepartment} status={status} setStatus={updateStatus} page={page} setPage={setPage} sort={sort} direction={direction} onSort={updateSort} onSelect={setSelectedId} />}
+        {screen === "insights" && <InsightsPage />}
+        {screen === "settings" && user.role === "ADMIN" && <AdminSettingsPage currentUserId={user.id} onLogout={logout} />}
+      </div>
+    </main>
+    <MobileNavigation screen={screen} role={user.role} onChange={setScreen} />
+    {selectedId && <ProfileDrawer id={selectedId} onClose={() => setSelectedId(null)} />}
+  </div>;
+}

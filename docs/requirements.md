@@ -1,48 +1,25 @@
-# ACME Salary Management — Product Requirements
+# ACME Compensation Hub — One-page requirements
 
-## Goal
+## Goal and user
 
-Give ACME HR managers a trustworthy, fast way to manage employee compensation and answer common pay questions without maintaining spreadsheets. The MVP must feel comfortable at 10,000 employees and make every change explainable.
+Replace HR spreadsheets with a searchable salary workspace for 10,000 ACME employees across six countries. The HR Manager finds people, updates base salary, and compares pay by country or department. An Administrator manages HR access.
 
-## Primary user
+## MVP scope
 
-An HR manager who needs to find an employee, review or update salary data, understand compensation by country/department, and export a working set for follow-up.
+- **Access:** username/password login and API-enforced Administrator/HR Manager roles. Administrators create, activate, deactivate, and transfer access; HR Managers use compensation features.
+- **Directory:** SQL-backed name/email search, country/department/status filters, sorting, 12-row pagination, and salary profiles.
+- **Salary management:** show local amount, pay frequency, effective date, annualized USD, and history. HR edits the amount with a reason; the API validates it and atomically records before/after values.
+- **Pay questions:** dashboard shows headcount, annualized USD payroll, average salary, and country count. Insights group headcount, payroll, and average by country or department using documented fixed FX rates.
+- **Export and data:** CSV download of the filtered/sorted **current page**; deterministic SQLite seed of exactly 10,000 synthetic employees and salary records.
+- **Quality:** responsive React UI, Django API, repeatable local setup, and automated core-flow tests.
 
-## In scope (MVP)
+## Deliberate exclusions and reasons
 
-- Employee directory with server-side search, pagination, and filters for country, department, employment status, and compensation band.
-- Employee salary profile with base salary, currency, pay frequency, effective date, employment details, and last updated metadata.
-- Create and edit salary records with validation; preserve an audit event for each change.
-- Dashboard summary cards: headcount, total annualized payroll in a selected reporting currency, average salary, and countries represented.
-- Compensation analysis grouped by country and department with headcount, average, minimum, maximum, and total annualized pay.
-- CSV export of the currently filtered employee list.
-- Deterministic seed script generating exactly 10,000 realistic employees across countries and departments.
-- Responsive web UI, documented API, automated tests, and a simple local/deployment path.
+- **New employee creation, bulk import, approvals:** duplicate detection and review workflows add complexity; seeded employees support the single-record MVP.
+- **Payroll execution, tax, benefits, bonus, equity:** regional rules and external systems exceed base salary management.
+- **Selectable reporting currency and live FX:** fixed USD rates keep demo comparisons reproducible; Finance must approve rates before real use.
+- **Enterprise SSO and real employee data:** local demo authentication and synthetic data avoid premature identity/privacy assumptions.
 
-## Product principles
+## Acceptance checks
 
-1. **Safe by default:** money values are validated, edits are explicit, and audit history is append-only.
-2. **Useful at a glance:** the dashboard answers “how do we pay people?” before asking the manager to build a report.
-3. **Fast for 10,000 rows:** never send the entire directory to the browser for routine browsing; aggregate in the database.
-4. **Transparent assumptions:** reporting currency and annualization rules are visible in the UI.
-
-## Deliberately out of scope
-
-- Authentication/SSO and role-based access: essential for production, but not needed to demonstrate the core workflow; the service boundary leaves room for it.
-- Payroll execution, tax calculations, benefits, bonuses, equity, and local legal compliance: these require country-specific rules and integrations beyond a salary-management MVP.
-- Multi-currency FX history: the MVP stores local currency and uses a documented static rate table for comparable dashboard totals; a provider-backed rate service can replace it later.
-- Bulk upload/import and approval workflows: useful next steps, but they add conflict resolution and permission complexity before the single-record workflow is proven.
-- Real-time collaboration, notifications, and mobile-native apps: not required for the stated HR-manager workflow.
-
-## Success measures
-
-- A manager can find and update a record in under 30 seconds.
-- Directory queries return within 300 ms locally for common filters at 10,000 rows.
-- Summary and analysis numbers reconcile with the same salary records visible in the directory.
-- Core domain/API behavior is covered by fast deterministic tests.
-
-## Open risks / follow-ups
-
-- Confirm the canonical source of FX rates and effective-date policy with Finance.
-- Add SSO, authorization, encryption, retention, and audit export before handling real employee data.
-- Validate local currency and salary-band rules with regional HR partners.
+HR can find and update an employee, see history, compare pay, and export a page. Admin can create users and transfer ownership without self-editing. Fresh migration and seed produce 10,000 employees and 10,000 salaries.

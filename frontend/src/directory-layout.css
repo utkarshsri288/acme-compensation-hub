@@ -1,0 +1,55 @@
+@media (min-width: 801px) {
+  .app-shell > main:has(.directory-content) {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-shell > main:has(.directory-content) > header { flex: 0 0 64px; }
+  .directory-content {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .directory-content > .heading,
+  .directory-content > .filters { flex: 0 0 auto; }
+  .directory-content > .employee-directory-table {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .employee-directory-table > .panel-head,
+  .employee-directory-table > .pagination { flex: 0 0 auto; }
+  .employee-table-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+  .employee-table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff;
+  }
+}
+.directory-empty {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  min-height: 180px;
+}
+.directory-empty p { margin: 0; }
+.filters { grid-template-columns: minmax(200px, 1.8fr) repeat(3, minmax(140px, 1fr)); }
+@media (max-width: 1000px) {
+  .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .filters { grid-template-columns: 1fr; }
+}
