@@ -37,4 +37,6 @@ Directory search, filters, sorting, pagination, and grouped compensation calcula
 
 ## Current deployment boundary
 
-The repository supplies a reproducible **local** two-server run path in `README.md`. A hosted deployment and video demo are still separate submission work. Before using real salary data, add actor attribution, stronger audit retention, SSO, backups, an appropriate production database, and an approved FX policy. Avoid treating the seeded SQLite database as real HR data.
+The public assessment demo runs at `https://utkarshsri288.pythonanywhere.com/`. PythonAnywhere's WSGI app serves the React production build and Django API from one origin; compiled assets are mapped under `/static/`, and SQLite lives under the account's persistent home directory. The reproducible local run path is documented in `README.md`, and the hosting steps are in `docs/deploy-pythonanywhere.md`.
+
+This deployment is a single-worker, free-tier assessment demo with synthetic data. Before using real salary data, add actor attribution to audit events, stronger audit retention, SSO, backups and recovery, an approved FX policy, and a production database sized for the workload. Do not treat the seeded SQLite database as real HR data.
