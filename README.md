@@ -108,6 +108,5 @@ Local development defaults to `DJANGO_DEBUG=true`. For a deployment, set `DJANGO
 - [`docs/architecture.md`](docs/architecture.md) — application shape, data model, API, and performance decisions
 - [`docs/ai-usage.md`](docs/ai-usage.md) — where AI assisted and how outputs were checked
 - [`docs/deploy-pythonanywhere.md`](docs/deploy-pythonanywhere.md) — hosted SQLite deployment steps
-- [`planning/index.html`](planning/index.html) — visual product plan and interface references
 - `backend/compensation/` — Django models, API, permissions, seed commands, and tests
 - `frontend/src/pages/` and `frontend/src/components/` — React pages and reusable UI
